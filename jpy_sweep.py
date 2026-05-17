@@ -9,13 +9,13 @@ import pandas as pd
 
 from jpy_constants import (CAPITAL_USD, TD, CONTRACT_SPECS,
                            ETF_COST_BP, ETF_BORROW_BP_ANNUAL,
-                           SLEEVE_TARGET_VOL_DAILY, SCALE_CAP,
+                           TARGET_VOL_DAILY, SCALE_CAP,
                            VOL_LOOKBACK_PAIR)
 from jpy_pnl import load_pair_data
 
 root = Path(__file__).resolve().parent
 
-sleeve_capital = CAPITAL_USD * 0.10
+strategy_capital = CAPITAL_USD * 0.10
 is_start       = pd.Timestamp("2018-01-01")
 is_end         = pd.Timestamp("2021-12-31")
 oos_start      = pd.Timestamp("2022-01-01")
@@ -36,7 +36,7 @@ n_obs = len(common)
 spec          = CONTRACT_SPECS["MJY"]
 contract_mult = spec["mult"]
 fut_vol       = fut_prices_a.pct_change().rolling(VOL_LOOKBACK_PAIR).std().shift(1)
-vol_scale     = (SLEEVE_TARGET_VOL_DAILY / fut_vol.replace(0, np.nan)).clip(upper=SCALE_CAP).fillna(0.0).values
+vol_scale     = (TARGET_VOL_DAILY / fut_vol.replace(0, np.nan)).clip(upper=SCALE_CAP).fillna(0.0).values
 contract_value  = (contract_mult * fut_prices_a).values
 fut_arr         = fut_prices_a.values
 etf_arr         = etf_prices_a.values
@@ -46,7 +46,7 @@ etf_price_chg   = np.diff(etf_arr, prepend=etf_arr[0])
 
 def pnl_from_pos(position):
     fut_contracts = np.round(np.nan_to_num(
-        position * vol_scale * sleeve_capital / np.where(contract_value != 0, contract_value, np.nan)
+        position * vol_scale * strategy_capital / np.where(contract_value != 0, contract_value, np.nan)
     )).astype(int)
     fut_notional  = fut_contracts * contract_value
     etf_shares    = np.round(np.nan_to_num(

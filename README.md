@@ -5,7 +5,7 @@ futures and the FXY ETF.
 
 - IS: 2018-2021
 - OOS: Jan 2022 - present
-- Sleeve capital: 10% of $1M
+- Strategy capital: $100K (10% risk allocation on a $1M reference account)
 - Vol-targeted via daily realised vol with a scale cap
 
 ## Strategy

@@ -10,7 +10,7 @@ from scipy.special import ndtr
 from jpy_pnl import (load_pair_data, compute_zscore, run_state_machine,
                      pnl_from_position, CAPITAL_USD, TD)
 
-sleeve_capital  = CAPITAL_USD * 0.10
+strategy_capital  = CAPITAL_USD * 0.10
 is_start        = pd.Timestamp("2018-01-01")
 is_end          = pd.Timestamp("2021-12-31")
 oos_start       = pd.Timestamp("2022-01-01")
@@ -26,7 +26,7 @@ z_arr = compute_zscore(d["log_fut"], d["log_etf"], beta_window, zscore_window)
 
 print("running state machine and pnl...")
 position = run_state_machine(z_arr, entry_threshold, exit_threshold, max_hold_days)
-pnl_arr  = pnl_from_position(position, fut_prices_a, etf_prices_a, sleeve_capital)
+pnl_arr  = pnl_from_position(position, fut_prices_a, etf_prices_a, strategy_capital)
 
 is_mask  = (common >= is_start) & (common <= is_end)
 oos_mask = (common >= oos_start)

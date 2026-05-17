@@ -7,7 +7,7 @@ import numpy as np
 
 from jpy_constants import (CAPITAL_USD, TD, CONTRACT_SPECS,
                            ETF_COST_BP, ETF_BORROW_BP_ANNUAL,
-                           SLEEVE_TARGET_VOL_DAILY, SCALE_CAP,
+                           TARGET_VOL_DAILY, SCALE_CAP,
                            VOL_LOOKBACK_PAIR)
 
 # Data loaders live in the sibling prop_trading repo (raw DBN data + databento).
@@ -86,17 +86,17 @@ def run_state_machine(z_arr, entry_threshold, exit_threshold, max_hold_days,
     return position
 
 
-def pnl_from_position(position, fut_prices_a, etf_prices_a, sleeve_capital):
+def pnl_from_position(position, fut_prices_a, etf_prices_a, strategy_capital):
     spec          = CONTRACT_SPECS["MJY"]
     contract_mult = spec["mult"]
     fut_arr       = fut_prices_a.values
     etf_arr       = etf_prices_a.values
 
     fut_vol   = fut_prices_a.pct_change().rolling(VOL_LOOKBACK_PAIR).std().shift(1)
-    vol_scale = (SLEEVE_TARGET_VOL_DAILY / fut_vol.replace(0, np.nan)).clip(upper=SCALE_CAP).fillna(0.0).values
+    vol_scale = (TARGET_VOL_DAILY / fut_vol.replace(0, np.nan)).clip(upper=SCALE_CAP).fillna(0.0).values
     contract_value = contract_mult * fut_arr
     fut_contracts  = np.round(np.nan_to_num(
-        position * vol_scale * sleeve_capital / np.where(contract_value != 0, contract_value, np.nan)
+        position * vol_scale * strategy_capital / np.where(contract_value != 0, contract_value, np.nan)
     )).astype(int)
     fut_notional   = fut_contracts * contract_value
     etf_shares     = np.round(np.nan_to_num(

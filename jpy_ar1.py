@@ -9,7 +9,7 @@ import pandas as pd
 from jpy_pnl import (load_pair_data, compute_zscore, run_state_machine,
                      pnl_from_position, CAPITAL_USD, TD)
 
-sleeve_capital  = CAPITAL_USD * 0.10
+strategy_capital  = CAPITAL_USD * 0.10
 oos_start       = pd.Timestamp("2022-01-01")
 beta_window, zscore_window = 126, 30
 entry_threshold, exit_threshold, max_hold_days = 1.00, 0.00, 30
@@ -18,7 +18,7 @@ d = load_pair_data()
 common, fut_prices_a, etf_prices_a = d["common"], d["fut_prices_a"], d["etf_prices_a"]
 z_arr    = compute_zscore(d["log_fut"], d["log_etf"], beta_window, zscore_window)
 position = run_state_machine(z_arr, entry_threshold, exit_threshold, max_hold_days)
-pnl_arr  = pnl_from_position(position, fut_prices_a, etf_prices_a, sleeve_capital)
+pnl_arr  = pnl_from_position(position, fut_prices_a, etf_prices_a, strategy_capital)
 
 oos_mask = (common >= oos_start)
 ret_oos  = (pd.Series(pnl_arr, index=common)[oos_mask] / CAPITAL_USD).dropna()

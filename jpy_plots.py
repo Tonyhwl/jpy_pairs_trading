@@ -16,12 +16,11 @@ from matplotlib.colors import LinearSegmentedColormap, TwoSlopeNorm
 from jpy_pnl import (load_pair_data, compute_zscore, run_state_machine,
                      pnl_from_position, CAPITAL_USD, TD)
 
-root       = Path(__file__).resolve().parent
-out_root   = root / "results"
-out_sleeve = out_root / "sleeves" / "6J_FXY"
-out_sleeve.mkdir(parents=True, exist_ok=True)
+root     = Path(__file__).resolve().parent
+out_root = root / "results"
+out_root.mkdir(parents=True, exist_ok=True)
 
-sleeve_capital  = CAPITAL_USD * 0.10
+strategy_capital  = CAPITAL_USD * 0.10
 oos_start       = pd.Timestamp("2022-01-01")
 beta_window, zscore_window = 126, 30
 entry_threshold, exit_threshold, max_hold_days = 1.00, 0.00, 30
@@ -88,7 +87,7 @@ z_arr = compute_zscore(d["log_fut"], d["log_etf"], beta_window, zscore_window)
 print("running state machine and pnl...")
 position = run_state_machine(z_arr, entry_threshold, exit_threshold, max_hold_days,
                               stop_threshold=stop_threshold)
-pnl_arr  = pnl_from_position(position, fut_prices_a, etf_prices_a, sleeve_capital)
+pnl_arr  = pnl_from_position(position, fut_prices_a, etf_prices_a, strategy_capital)
 
 pnl_s = pd.Series(pnl_arr, index=common)
 pos_s = pd.Series(position, index=common)
@@ -150,13 +149,13 @@ def make_zscore():
 
 def make_equity():
     r  = ret_oos
-    eq = sleeve_capital * (1 + r).cumprod()
+    eq = strategy_capital * (1 + r).cumprod()
 
     fig, ax = plt.subplots(figsize=(13, 5.0))
-    ax.fill_between(eq.index, sleeve_capital, eq.values,
+    ax.fill_between(eq.index, strategy_capital, eq.values,
                     color=line_c, alpha=0.08, linewidth=0)
     ax.plot(eq.index, eq.values, color=line_c, lw=1.5)
-    ax.axhline(sleeve_capital, color=border, lw=0.8, ls="--", alpha=0.8)
+    ax.axhline(strategy_capital, color=border, lw=0.8, ls="--", alpha=0.8)
 
     def fmt_usd(x, _=None):
         if abs(x) >= 1e6:
@@ -166,7 +165,7 @@ def make_equity():
     ax.yaxis.set_major_formatter(mtick.FuncFormatter(fmt_usd))
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
     ax.xaxis.set_major_locator(mdates.YearLocator())
-    ax.set_ylabel("sleeve value (USD)")
+    ax.set_ylabel("strategy value (USD)")
     ax.set_xlim(eq.index[0], eq.index[-1])
     ax.set_title("Cumulative equity  -  JPY basis pair (6J / FXY)  -  OOS 2022-2026",
                  loc="left", fontsize=10)
@@ -177,7 +176,7 @@ def make_equity():
         "Max DD":  f"{max_dd*100:+.1f}%",
     }, loc="upper left")
     plt.tight_layout()
-    p_out = out_sleeve / "equity.png"
+    p_out = out_root / "equity.png"
     plt.savefig(p_out); plt.close()
     print(f"  wrote {p_out}")
 
@@ -210,7 +209,7 @@ def make_drawdown():
     ax.set_title("Drawdown vs rolling high-water mark  -  JPY basis pair  -  OOS 2022-2026",
                  loc="left", fontsize=10)
     plt.tight_layout()
-    p_out = out_sleeve / "drawdown.png"
+    p_out = out_root / "drawdown.png"
     plt.savefig(p_out); plt.close()
     print(f"  wrote {p_out}")
 
@@ -272,7 +271,7 @@ def make_heatmap():
         loc="left", fontsize=10
     )
     plt.tight_layout()
-    p_out = out_sleeve / "heatmap.png"
+    p_out = out_root / "heatmap.png"
     plt.savefig(p_out); plt.close()
     print(f"  wrote {p_out}")
 
