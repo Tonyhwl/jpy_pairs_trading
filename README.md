@@ -46,6 +46,24 @@ python jpy_ar1.py          # AR(1) null hypothesis test
 python jpy_plots.py        # paper figures
 ```
 
+## Figures
+
+Residual log-spread z-score with entry / exit / stop bands, OOS 2022-2026:
+
+![zscore](figs/6j_fxy_zscore.png)
+
+Cumulative equity:
+
+![equity](figs/equity.png)
+
+Drawdown from rolling high-water mark:
+
+![drawdown](figs/drawdown.png)
+
+Monthly returns heatmap:
+
+![heatmap](figs/heatmap.png)
+
 ## Data dependency
 
 Contract specs and cost params live in `jpy_constants.py` (self-contained).
